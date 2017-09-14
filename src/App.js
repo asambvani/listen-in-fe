@@ -54,31 +54,32 @@ class App extends Component {
     if(this.state.user && this.state.currentUserChannel === this.state.user.id){
       fetch(playbackURL, init)
       .then((resp)=> resp.json())
-      .then((data) => this.setState({
+      .then((data) => {
+        this.setState({
         currentSong: {
           name: data.item.name,
           position: data.progress_ms,
           isPlaying: data.is_playing
         }
-      }), this.broadcastState)
+      }, this.broadcastState)})
     }
     else{
-      this.setState({
-        currentSong:{
+      this.setState(
+        {currentSong:{
           name: "Another song's channel!"
-        }
-      })
+        }})
     }
   }
   broadcastState = () => {
-    // let init = {
-    //   method: 'POST',
-    //   body: {
-    //     state: "THIS IS THE STATE DATA"
-    //   }
-    // }
-    // let statusURL = 'https://localhost:3000/api/v1/statuses'
-    // fetch(statusURL,init)
+    let init = {
+      method: 'POST',
+      body: JSON.stringify({status:'THIS IS A STATUS'}),
+      headers: {'Content-Type': 'application/json' }
+    }
+    let statusURL = 'http://localhost:3000/api/v1/statuses'
+    fetch(statusURL,init)
+    .then((resp)=> resp.json())
+    .then((data)=> console.log(data))
   }
   render() {
     return (
