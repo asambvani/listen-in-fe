@@ -2,6 +2,9 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import {Grid, Dropdown} from 'semantic-ui-react'
+import TopBar from './components/topBar.js'
+import ChannelBar from './components/channelBar.js'
+import PlayerContainer from './components/playerContainer.js'
 
 let scopes = "user-read-currently-playing+user-modify-playback-state"
 //make these server variables
@@ -13,21 +16,30 @@ let channels = [
 ]
 
 class App extends Component {
-  state = {
-    user: {},
-    currentSong: {
-      name: "",
-      position: "",
-      isPlaying: false
-    },
-    currentUserChannel: 0
+
+    state = {
+      user: {},
+      currentSong: {
+        name: "",
+        position: "",
+        isPlaying: false
+      },
+      currentUserChannel: 0
+    }
+
+  pluck = (array,key)=> {
+    return array.map(o => o[key])
   }
+
   handleChannelChange=(event, {value})=>{
     this.setState({
       currentUserChannel: value
     })
   }
+
   componentDidMount(){
+
+
     if (!window.location.href.split('?')[1]){
       window.location = "https://accounts.spotify.com/authorize/?client_id=" + CLIENT_ID + "&response_type=code" + "&redirect_uri="+REDIRECT_URI+"&scope=" + scopes  ;}
       else {
@@ -55,13 +67,25 @@ class App extends Component {
       fetch(playbackURL, init)
       .then((resp)=> resp.json())
       .then((data) => {
-        this.setState({
-        currentSong: {
-          name: data.item.name,
-          position: data.progress_ms,
-          isPlaying: data.is_playing
+        console.log(data)
+        if(data){
+          this.setState({
+          currentSong: {
+            name: data.item.name,
+            position: data.progress_ms,
+            isPlaying: data.is_playing,
+            URI: data.uri,
+            album: data.item.album.name,
+            artist: this.pluck(data.item.artists, "name").join(", "),
+            thumbnailURL: data.item.album.images[1].url,
+          }
+        }, this.broadcastState)}
+        else{
+
         }
-      }, this.broadcastState)})
+      }
+
+    )
     }
     else{
       this.setState(
@@ -73,34 +97,29 @@ class App extends Component {
   broadcastState = () => {
     let init = {
       method: 'POST',
-      body: JSON.stringify({status:'THIS IS A STATUS'}),
+      body: JSON.stringify({
+        status:{
+          channel_id: this.state.user.id,
+          current_song: this.state.currentSong.name,
+          current_song_uri: this.state.currentSong.URI,
+          current_song_album: this.state.currentSong.album,
+          current_song_artist: this.state.currentSong.artist,
+          current_song_progress: this.state.currentSong.position,
+          thumbnail_URL: this.state.currentSong.thumbnailURL
+        }
+      }),
       headers: {'Content-Type': 'application/json' }
     }
     let statusURL = 'http://localhost:3000/api/v1/statuses'
     fetch(statusURL,init)
-    .then((resp)=> resp.json())
-    .then((data)=> console.log(data))
   }
   render() {
     return (
       <Grid>
-        <Grid.Row width={16}>
-          <Grid.Column width={4} color="black" textAlign="center">
-            <h1>Listen'n</h1>
-          </Grid.Column>
-          <Grid.Column width={12} color="black">
-            <h1>Welcome, {this.state.user.display_name}!</h1>
-          </Grid.Column>
-        </Grid.Row>
-        <Grid.Row width={16}>
-          <Grid.Column width={4}textAlign="center">
-          </Grid.Column>
-          <Grid.Column width={12}>
-            <h1>Current Song: {this.state.currentSong.name}</h1>
-            <h1>Current Song Position: {this.state.currentSong.position}</h1>
-            <Dropdown placeholder="Select Channel" search selection options={channels} onChange={this.handleChannelChange}/>
-          </Grid.Column>
-        </Grid.Row>
+        <TopBar />
+        <ChannelBar currentUserChannel= {this.state.currentUserChannel}/>
+        <PlayerContainer channels={channels} currentSong={this.state.currentSong}/>
+
       </Grid>
     );
   }
