@@ -11,13 +11,10 @@ class TopBar extends React.Component{
   render(){
     return(
       <Grid.Row width={16}>
-        <Grid.Column width={4} color="black" textAlign="center">
+        <Grid.Column width={4} color="black" textAlign="center" verticalAlign="bottom">
           <h2 className="topbar-text">YOU'RE LISTEN'N TO:</h2>
         </Grid.Column>
-        <Grid.Column width={8} color="black">
-        </Grid.Column>
-        <Grid.Column width={4} color="blue" textAlign='bottom'>
-        <h3>Search</h3>
+        <Grid.Column width={12} color="black">
         </Grid.Column>
       </Grid.Row>
     )

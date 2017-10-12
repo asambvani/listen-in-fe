@@ -28,9 +28,15 @@ body{
 }
 
 .topbar-text {
-  color:#1ED760
+  color:#1ED760;
+  padding-top: 10px;
 }
 
 .channel-image {
   margin-left: 25px
+}
+
+#menu{
+  display: none;
+  
 }

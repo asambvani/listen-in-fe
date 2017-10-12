@@ -5,6 +5,7 @@ import {Grid, Dropdown} from 'semantic-ui-react'
 import TopBar from './components/topBar.js'
 import ChannelBar from './components/channelBar.js'
 import PlayerContainer from './components/playerContainer.js'
+import Menu from './components/menu.js'
 
 let scopes = "user-read-currently-playing+user-modify-playback-state"
 //make these server variables
@@ -24,7 +25,8 @@ class App extends Component {
         position: "",
         isPlaying: false
       },
-      currentUserChannel: 0
+      currentUserChannel: 0,
+      menuVisible: false
     }
 
   pluck = (array,key)=> {
@@ -113,13 +115,18 @@ class App extends Component {
     let statusURL = 'http://localhost:3000/api/v1/statuses'
     fetch(statusURL,init)
   }
+  expandMenu = () =>{
+    this.setState({
+      menuVisible: !this.state.menuVisible
+    })
+  }
   render() {
     return (
       <Grid>
         <TopBar />
-        <ChannelBar currentUserChannel= {this.state.currentUserChannel}/>
+        <ChannelBar currentUserChannel= {this.state.currentUserChannel} expandMenu={this.expandMenu}/>
+        <Menu visible={this.state.menuVisible}/>
         <PlayerContainer channels={channels} currentSong={this.state.currentSong}/>
-
       </Grid>
     );
   }
